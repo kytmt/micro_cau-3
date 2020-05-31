@@ -216,6 +216,8 @@ void input_mode() {
 				     sel.finish = 0;		
 			             menu_display();
 					sel.all = 1;
+					number = 1500;
+					fnd_number(number);
 			}
                        
 			else if (sel.temperature == 1) {
@@ -225,6 +227,7 @@ void input_mode() {
                                 sel.temperature = 0;
                                      sel.finish = 0;
                                      menu_display();
+									 fnd_number(number);
                         }
 			
 			else if (sel.sidemenu == 1) {
@@ -234,6 +237,8 @@ void input_mode() {
                                 sel.temperature = 0;
                                      sel.finish = 0;
 				     menu_display();
+					 number += 3000;
+					 fnd_number(number);
 			}
                         else if (sel.payment == 1) { 
                                    sel.mainmenu = 0;
@@ -242,6 +247,7 @@ void input_mode() {
                                 sel.temperature = 0;
 				sel.finish = 1;
 				     menu_display();
+					 fnd_number(number);
 
                         }
  
@@ -257,6 +263,8 @@ void input_mode() {
                                      sel.finish = 0;
 				     menu_display();
 					sel.all = 1; 
+					number = 2000;
+					fnd_number(number);
 			}
 
                         else if (sel.temperature == 1) {
@@ -266,6 +274,8 @@ void input_mode() {
                                 sel.temperature = 0;
                                      sel.finish = 0;
                                      menu_display();
+									 number += 300;
+									 fnd_number(number);
                         }
 
                         else if (sel.sidemenu == 1) {
@@ -275,6 +285,8 @@ void input_mode() {
                                 sel.temperature = 0;
                                      sel.finish = 0;
                                      menu_display();
+									 number += 2000
+									 fnd_number(number);
                         }
                         else if (sel.payment == 1) {
                                    sel.mainmenu = 0;
@@ -283,6 +295,7 @@ void input_mode() {
                                 sel.temperature = 0;
 				     sel.finish = 1;
                                      menu_display();
+									 fnd_number(number);
                         }
 
 	
