@@ -11,9 +11,16 @@ static unsigned short fnd_decimal[] = {
 	0x07, // 7
 	0x7f, // 8
 	0x67, // 9
-	}
+	};
 
 static short * fnd[MAX_FND];
+
+void init_fnd(short * address[]) {
+	int i;
+	for( i=0; i<MAX_FND; i++ ) {
+		fnd[i] = address[i];
+	}
+}
 	
 void fnd_clear() {
 	int i;
