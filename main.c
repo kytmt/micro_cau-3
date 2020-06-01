@@ -230,6 +230,8 @@ void select_mode() {
 
 	scanf("%s", buf);
 
+	sel.dot = 1;
+	
 	if (strlen(buf) != 0) {
 
 		sel.mainmenu= 1;
@@ -421,6 +423,8 @@ void input_mode() {
 	//key_count = keypad_read(&key_value);
 
 	key_value = keyboard_read(&key_value, &key_count);
+	
+	dot_write(key_value+1);
 
 	if(key_value == 0) {
 
