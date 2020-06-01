@@ -203,6 +203,7 @@ void input_mode() {
 	int key_count, key_value;
 	char clcd_str_line1[20] = "";
 	char clcd_str_line2[20] = "";
+	int number;
 
 	//key_count = keypad_read(&key_value);
 	key_value = keyboard_read(&key_value, &key_count);
@@ -285,7 +286,7 @@ void input_mode() {
                                 sel.temperature = 0;
                                      sel.finish = 0;
                                      menu_display();
-									 number += 2000
+									 number += 2000;
 									 fnd_number(number);
                         }
                         else if (sel.payment == 1) {

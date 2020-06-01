@@ -15,13 +15,13 @@ void led_all() {
 }
 
 void led_stage() {
-	if (stage==1){
+	if (sel.temperature==1){
     *led = (short)~0x03;
 	}
-	else if (stage==2){
+	else if (sel.sidemenu==2){
 	*led = (short)~0x1B;
 	}
-	else if (stage==3){
+	else if (sel.payment==3){
 	*led = (short)~0xDB;
 	}
 }
