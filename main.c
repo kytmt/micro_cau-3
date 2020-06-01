@@ -286,7 +286,7 @@ void input_mode() {
                                 sel.temperature = 0;
                                      sel.finish = 0;
                                      menu_display();
-									 number += 2000
+									 number += 2000;
 									 fnd_number(number);
                         }
                         else if (sel.payment == 1) {
