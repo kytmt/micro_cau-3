@@ -1,4 +1,4 @@
-#include fnd.h
+#include "fnd.h"
 
 static unsigned short fnd_decimal[] = {
 	0x3F, // 0
