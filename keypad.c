@@ -6,10 +6,10 @@
 
 static short * keypad_out, * keypad_in;
 
-char keyboard[16] = {'0', '1', '2', '3',
-		     '4', '5', '6', '7',
-		     '8', '9', 'q', 'w',
-		     'e', 'r', 't', 'y'};
+char keyboard[16] = {'1', '2', '3', '4',
+		     'q', 'w', 'e', 'r',
+		     'a', 's', 'd', 'f',
+		     'z', 'x', 'c', 'v'};
 
 
 void init_keypad(short * address_out, short * address_in) {
