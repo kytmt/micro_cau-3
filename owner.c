@@ -1,17 +1,17 @@
-//***** Header file ******
-#include <stdio.h>
+//***** Header file ****** //
+#include <stdio.h>         
 #include <stdlib.h>
 #include <unistd.h>
-#include <string.h>
-#include <signal.h>
-#include <time.h>
+#include <string.h>       // stdio.h~string.h are common header
+#include <signal.h>       // signal, sigaction etc...
+#include <time.h>         // time() 
 #include <sys/types.h>
 
-//******* Variable *******
+//******* Variable ******* //
 typedef struct order {
 
 	char mainmenu[20];
-	char temperature[10];
+	char temperature[10];      //store information from customer process
 	char sidemenu[20];
 	char payment[10];
 
@@ -30,40 +30,58 @@ static int bread_num = 0;
 static int cookie_num = 0;
 
 
-//***** Prototype *******
+//***** Prototype ******* //
 void sigusr1_handler(int sig, siginfo_t *info, void *ucontext);
 void sigint_handler();
 int sales_display();
+void display_open();
 
-//******* Code *********
+//******* Code ********* //
 int main(int argc, char **argv) 
 {
 
 	signal(SIGINT,sigint_handler);
 
-	memset(&o1, 0, sizeof(struct order));
-	memset(&act, 0, sizeof(struct sigaction));
-	act.sa_flags = SA_SIGINFO;
-	act.sa_sigaction = sigusr1_handler;
+	memset(&o1, 0, sizeof(struct order));        // initialization
+	memset(&act, 0, sizeof(struct sigaction));   // initialization 
+	act.sa_flags = SA_SIGINFO;                   // to use sa_sigaction as handler
+	act.sa_sigaction = sigusr1_handler;          // set sigusr1_handler
 
-	if (sigaction(SIGUSR1, &act, NULL)) {
+	if (sigaction(SIGUSR1, &act, NULL)) {        // to receive payload and signal from customer
 		printf("sigaction() fail\n");
 		return -1;
 	}
 
+	display_open();
+
 	while(1) {
-		sleep(1);
+		sleep(1);                           // to reduce CPU workload and to receive signal
 	}
 
 	return 0;
 
 }
 
+void display_open() 
+{
+
+        printf("\n************************************\n");
+        printf("*                                  *\n");
+        printf("*   CAU coffee shop sales record   *\n");
+        printf("*                                  *\n");
+        printf("************************************\n");
+
+        system("echo Opening Times:; date ");
+}	
+
 void sigusr1_handler(int sig, siginfo_t *info, void *ucontext)
 {
         int temp;
 
-        temp = info->si_int;
+        temp = info->si_int;                       // store data(payload) from customer process
+
+	/* below code is used to extract data from payload */
+	
         if      ((temp / 1000)  == 1) {
 		strcpy(o1.payment, "Cash");
 	}			
@@ -101,7 +119,7 @@ void sigusr1_handler(int sig, siginfo_t *info, void *ucontext)
 		latte_num += 1;	
 	}
 
-	sales_display();
+	sales_display();                       // Display function on the terminal 
 }
 
 void sigint_handler() {
@@ -143,17 +161,6 @@ int sales_display() {
                 return -1;
         }
 
-	if (order_num == 1) {
-
-        printf("************************************\n");
-        printf("*                                  *\n");
-        printf("*   CAU coffee shop sales record   *\n");
-        printf("*                                  *\n");
-        printf("************************************\n");
-	
-	system("echo Opening Times:; date ");
-	}
- 
 	printf("\n************************************");
 	printf("\nOrder number : %d", order_num);
         printf("\nSelling times: %d/%d/%d %d:%d:%d",
