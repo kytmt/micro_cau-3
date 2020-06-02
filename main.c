@@ -180,6 +180,7 @@ void select_mode() {
 	printf("************************************\n\n");
 	scanf("%s", buf);
 	if (strlen(buf) != 0) {
+		sel.dot = 1;
 		sel.mainmenu= 1;
 	}
         sel.sidemenu = 0;
@@ -192,7 +193,8 @@ void select_mode() {
 }
 
 void menu_display() {
-        
+       
+	int stage; 
 	char clcd_str_line1[20] = "";
         char clcd_str_line2[20] = "";
 
@@ -278,9 +280,12 @@ void input_mode() {
 	int key_count, key_value;
 	char clcd_str_line1[20] = "";
 	char clcd_str_line2[20] = "";
+	int number;
 
 	//key_count = keypad_read(&key_value);
 	key_value = keyboard_read(&key_value, &key_count);
+	dot_write(key_value + 1);		
+
 	if(key_value == 0) {
 	// next page choose 1//
 			if (sel.mainmenu == 1) {

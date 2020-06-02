@@ -38,8 +38,10 @@ int sales_display();
 //******* Code *********
 int main(int argc, char **argv) 
 {
+
 	signal(SIGINT,sigint_handler);
 
+	memset(&o1, 0, sizeof(struct order));
 	memset(&act, 0, sizeof(struct sigaction));
 	act.sa_flags = SA_SIGINFO;
 	act.sa_sigaction = sigusr1_handler;
@@ -65,7 +67,7 @@ void sigusr1_handler(int sig, siginfo_t *info, void *ucontext)
         if      ((temp / 1000)  == 1) {
 		strcpy(o1.payment, "Cash");
 	}			
-        else if ((temp /= 1000) == 2) {
+        else if ((temp / 1000) == 2) {
 		strcpy(o1.payment, "Card");
 	}
         temp %= 1000;
@@ -98,6 +100,7 @@ void sigusr1_handler(int sig, siginfo_t *info, void *ucontext)
 		strcpy(o1.mainmenu, "Latte");
 		latte_num += 1;	
 	}
+
 	sales_display();
 }
 
