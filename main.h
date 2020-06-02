@@ -9,7 +9,10 @@
 #include <sys/mman.h>	// mmap(), munmap()
 #include <stdlib.h> 	// exit()
 #include <string.h>		// strlen()
-
+#include <time.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <signal.h>
 
 #include "ieb.h"
 #include "led.h"
@@ -55,5 +58,12 @@ truth_t logic();
 void select_mode();
 void input_mode();
 void menu_display();
+static void print_usage();
+static void do_customer();
+static void do_owner();
+static void sigint_handler();
+
+union sigval sell;
+
 
 #endif
