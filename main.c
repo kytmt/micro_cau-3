@@ -134,6 +134,7 @@ void select_mode() {
 	printf("************************************\n\n");
 	scanf("%s", buf);
 	if (strlen(buf) != 0) {
+		sel.dot = 1;
 		sel.mainmenu= 1;
 	}
 	sel.sidemenu=0;
@@ -143,12 +144,13 @@ void select_mode() {
 	sel.error=0;
 	sel.flag=0; 
 	sell.sival_int = 0;
+	
 
 	menu_display();
 }
 
 void menu_display() {
-        
+        int stage;
 	char clcd_str_line1[20] = "";
         char clcd_str_line2[20] = "";
 
@@ -172,6 +174,8 @@ void menu_display() {
         clcd_set_DDRAM(0x40);
         strcat(clcd_str_line2, menu[3]);
         clcd_write_string(clcd_str_line2);
+		stage=1;
+		led_stage();
 	}
 
         else if( sel.sidemenu == 1 ) {
@@ -183,6 +187,8 @@ void menu_display() {
         clcd_set_DDRAM(0x40);
         strcat(clcd_str_line2, menu[5]);
         clcd_write_string(clcd_str_line2);
+		stage=2;
+		led_stage();
         }
 
 	else if( sel.payment == 1) {
@@ -194,6 +200,8 @@ void menu_display() {
         clcd_set_DDRAM(0x40);
         strcat(clcd_str_line2, menu[7]);
         clcd_write_string(clcd_str_line2);
+		stage=3;
+		led_stage();
 	}
 
 	else if( sel.finish == 1) {
@@ -245,9 +253,11 @@ void input_mode() {
 	int key_count, key_value;
 	char clcd_str_line1[20] = "";
 	char clcd_str_line2[20] = "";
-
+	int number;
 	//key_count = keypad_read(&key_value);
 	key_value = keyboard_read(&key_value, &key_count);
+	
+	dot_write(key_value+1);
 	if(key_value == 0) {
 	// next page choose 1//
 			if (sel.mainmenu == 1) {
@@ -256,6 +266,8 @@ void input_mode() {
 				sell.sival_int += 1;
 			             menu_display();
 				image->mainmenu = 1;
+				number = 1500;
+					fnd_number(number);
 			}
                        
 			else if (sel.temperature == 1) {
@@ -264,6 +276,8 @@ void input_mode() {
                                 sell.sival_int += 10;
 				image->temperature = 1;
 					menu_display();
+					
+					fnd_number(number);
                         }
 			
 			else if (sel.sidemenu == 1) {
@@ -272,13 +286,15 @@ void input_mode() {
                                 sell.sival_int += 100;
 					menu_display();
 				image->sidemenu = 1;
-					
+						number += 3000;
+					fnd_number(number);
 			}
                         else if (sel.payment == 1) { 
 					sel.all=0;
 			             sel.finish = 1;
                                 sell.sival_int += 1000;
 					menu_display();
+					fnd_number(number);
                         }
 	}
 
@@ -290,6 +306,8 @@ void input_mode() {
 				sell.sival_int += 2;
 				     menu_display();
 				image->mainmenu = 2;
+							number = 2000;
+					fnd_number(number);
 			}
 
                         else if (sel.temperature == 1) {
@@ -298,6 +316,8 @@ void input_mode() {
                                 sell.sival_int += 20;
 				menu_display();
 				image->temperature = 2;
+				number += 300;
+					fnd_number(number);
                         }
 
                         else if (sel.sidemenu == 1) {
@@ -306,13 +326,15 @@ void input_mode() {
                                 sell.sival_int += 200;
 				menu_display();
 				image->sidemenu = 2;
+				number +=2000;
+					fnd_number(number);
                         }
                         else if (sel.payment == 1) {
 					sel.all=0;
 				     sel.finish = 1;
-                                sell.sival_int += 2000;
+                                sell.sival_int +=		2000;
 				menu_display();
-
+					fnd_number(number);
                         }
 
 	
