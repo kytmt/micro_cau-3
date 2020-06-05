@@ -76,6 +76,7 @@ void display_open()
 
 void sigusr1_handler(int sig, siginfo_t *info, void *ucontext)
 {
+	memset(&o1, 0, sizeof(struct order));
         int temp;
 
         temp = info->si_int;                       // store data(payload) from customer process

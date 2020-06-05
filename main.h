@@ -2,7 +2,6 @@
 #ifndef	MAIN_H
 #define	MAIN_H 
 
-
 #include <stdio.h>		// printf(), scanf(), fprintf()
 #include <fcntl.h>		// open()
 #include <unistd.h>		// close(), off_t , usleep()
@@ -13,6 +12,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <signal.h>
+#include <sys/wait.h>
 
 #include "ieb.h"
 #include "led.h"
@@ -21,6 +21,12 @@
 #include "clcd.h"
 #include "keypad.h"
 
+typedef struct image_data {
+         unsigned char mainmenu         : 2;
+         unsigned char temperature      : 2;
+         unsigned char sidemenu         : 2;
+         unsigned char flag             : 2;
+} image_data_t;
 
 
 typedef enum {
@@ -34,20 +40,40 @@ typedef enum {
 } error_t;
 
 typedef union {
-	unsigned char all;
+	unsigned short all;
 	struct {
-		unsigned char	led : 1;
+		unsigned char	led  : 1;
 		unsigned char 	clcd : 1;
-		unsigned char 	dot : 1;
-		unsigned char 	fnd : 1;
+		unsigned char 	dot  : 1;
+		unsigned char 	fnd  : 1;
 		unsigned char 	exit : 1;
 		unsigned char    mainmenu : 1;
 		unsigned char    sidemenu : 1;
 		unsigned char     payment : 1;
 		unsigned char temperature : 1;
 		unsigned char      finish : 1;
+		unsigned char	error : 1;
+		unsigned char	flag : 1;
 	};
 } seclection_t;
+
+static char *menu[] = {
+               "1.Americano 1500",
+               "2.Latte     2000",
+               "1.hot"		,   
+               "2.ice    +300",
+               "1.Bread     3000",
+               "2.Cookie    2000",
+               "1.Cash", 
+               "2.Card",
+               "Order completed",
+               "Please wait ^~^",
+	       "Please Order   ",
+	       "at least 1 menu",
+	       "Invalid input",
+	       "Restart "
+};
+
 
 int main();
 short * mapper(off_t offset, int prot);
