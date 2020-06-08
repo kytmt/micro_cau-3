@@ -69,3 +69,20 @@ void clcd_write_string(char str[]) {
 		clcd_write_data(str[i]);
 	}
 }
+
+void clcd_write_menu(int i)
+{
+        char clcd_str_line1[20] = "";
+        char clcd_str_line2[20] = "";
+
+       clcd_clear_display();
+       memset(clcd_str_line1, 0, sizeof(clcd_str_line1));
+       memset(clcd_str_line2, 0, sizeof(clcd_str_line2));
+
+        strcat(clcd_str_line1, menu[i]);
+        clcd_write_string(clcd_str_line1);
+        clcd_set_DDRAM(0x40);
+        strcat(clcd_str_line2, menu[i+1]);
+        clcd_write_string(clcd_str_line2);
+}
+
