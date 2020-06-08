@@ -284,6 +284,7 @@ static void sim_dots_view() {
 			putchar('.');
 		}
 		else {
+			fputs("\t    ",stdout);
 			putchar('@');
 	}
 	putchar('\n');
@@ -301,8 +302,10 @@ static void image_view() {
         unsigned char bread     = (image_data.sidemenu    == 1);
         unsigned char cookie	= (image_data.sidemenu    == 2);
 	unsigned char flag	= (image_data.flag	  == 1);
+	unsigned char flag_init = (image_data.flag	  == 2);
 	
 	//INITIALIZING STAGE 0//
+	if (flag_init)	{ goto init; } 
 
 	//MAINMENU     STAGE 1//
 	if (!(ice | hot)) {
@@ -354,6 +357,9 @@ static void image_view() {
                                 if      (bread)  { system("sed -n '44, 48p' ./src/image.txt"); }
                                 else if (cookie) { system("sed -n '49, 53p' ./src/image.txt"); }
 	}
+
+init:
+	system("");
 	
 }
   

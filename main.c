@@ -1,38 +1,15 @@
 //-------| src/main.c |-------//
 #include "main.h"
-#include <math.h>
 
-static off_t IEB_DOT[MAX_DOT] = {
-	IEB_DOT1,
-	IEB_DOT2,
-	IEB_DOT3,
-	IEB_DOT4,
-	IEB_DOT5
-};
-static off_t IEB_FND[MAX_FND] = {
-	IEB_FND0,
-	IEB_FND1,
-	IEB_FND2,
-	IEB_FND3,
-	IEB_FND4,
-	IEB_FND5,
-	IEB_FND6,
-	IEB_FND7
-};
-static void menu_clear();
-static void image_clear();
 static int fd;
 static int map_counter = 0;
-static void * map_data[100];
-static seclection_t sel;
-
-/* additional static variable design */
- 
-static pid_t pid;
-static pid_t pid_owner; 
 static int wstatus;
+static pid_t pid;
+static pid_t pid_owner;
 static image_data_t *image;
-
+void * map_data[100];
+static seclection_t sel;
+static union sigval sell;
 
 int main(int argc, char* argv[]) 
 {
@@ -64,379 +41,35 @@ int main(int argc, char* argv[])
 	return 0;
 }
 
-short * mapper(off_t offset, int prot) {
-	map_data[map_counter] = mmap(NULL, sizeof(short), prot, MAP_SHARED, fd, offset);
-	if ( map_data[map_counter] == MAP_FAILED ) {
-		fprintf(stderr, "Cannot do mmap()");
-		emergency_closer();
-	}
-	return (short *)map_data[map_counter++];
-}
-
-
-image_data_t * mapper_add(off_t offset, int prot) {
-        map_data[map_counter] = mmap(NULL, sizeof(struct image_data), prot, MAP_SHARED, fd, offset);
-        if ( map_data[map_counter] == MAP_FAILED ) {
-                fprintf(stderr, "Cannot do mmap()");
-                emergency_closer();
-        }
-        return (image_data_t *)map_data[map_counter++];
-}
-
-
-void unmapper() {
-	int i;
-	for( i=0; i<map_counter; i++) {
-		munmap(map_data[i], sizeof(short));
-	}
-	map_counter = 0;
-}
-
-void emergency_closer() {
-	unmapper();
-	close(fd);
-	exit(EXIT_FAILURE);
-}
-
-truth_t logic() {
-	if( sel.all == 0 ) { select_mode(); }
-	else if( sel.exit == 1 ) { return FALSE; }
-	else { input_mode(); }
-	return TRUE;
-}
-
-void print_usage (char *prog)
-{
-        printf("%s (customer/owner) \n", prog);
-}
-
-
-void select_mode() {
-	int i;  char buf[100];
-	char clcd_str_line1[20] = "";
-	char clcd_str_line2[20] = "";
-
-	led_clear();
-	dot_clear();
-	fnd_clear();
-	clcd_clear_display();
-	image_clear();
-	
-	printf("\n");
-	printf("************************************");
-	printf("*******************\n");
-	printf("*                                  \t\t      *\n");
-	printf("*  \t    Welcome to the CAU coffee shop            *\n"); 
-	printf("*                                  \t\t      *\n");
-	printf("*     \t      Type any text to order       \t      *\n");
-	printf("*                                  \t\t      *\n");
-	printf("*******************");
-	printf("************************************\n\n");
-	scanf("%s", buf);
-	if (strlen(buf) != 0) {
-		sel.dot = 1;
-		sel.mainmenu= 1;
-	}
-	sel.sidemenu=0;
-	sel.temperature=0;
-	sel.payment=0;
-	sel.finish=0;
-	sel.error=0;
-	sel.flag=0; 
-	sell.sival_int = 0;
-	
-
-	menu_display();
-}
-
-void menu_display() {
-        int stage;
-	char clcd_str_line1[20] = "";
-        char clcd_str_line2[20] = "";
-
-
-        if( sel.mainmenu == 1 ) {
-
-	menu_clear(clcd_str_line1, clcd_str_line2);
-
-        strcat(clcd_str_line1, menu[0]);
-        clcd_write_string(clcd_str_line1);
-        clcd_set_DDRAM(0x40);
-        strcat(clcd_str_line2, menu[1]);
-        clcd_write_string(clcd_str_line2);
-        }
-
-	else if( sel.temperature == 1) {
-        menu_clear(clcd_str_line1, clcd_str_line2);
-
-        strcat(clcd_str_line1, menu[2]);
-        clcd_write_string(clcd_str_line1);
-        clcd_set_DDRAM(0x40);
-        strcat(clcd_str_line2, menu[3]);
-        clcd_write_string(clcd_str_line2);
-		stage=1;
-		led_stage();
-	}
-
-        else if( sel.sidemenu == 1 ) {
-        
-	menu_clear(clcd_str_line1, clcd_str_line2);
-	
-        strcat(clcd_str_line1, menu[4]);
-        clcd_write_string(clcd_str_line1);
-        clcd_set_DDRAM(0x40);
-        strcat(clcd_str_line2, menu[5]);
-        clcd_write_string(clcd_str_line2);
-		stage=2;
-		led_stage();
-        }
-
-	else if( sel.payment == 1) {
-       
-        menu_clear(clcd_str_line1, clcd_str_line2);
- 
-        strcat(clcd_str_line1, menu[6]);
-        clcd_write_string(clcd_str_line1);
-        clcd_set_DDRAM(0x40);
-        strcat(clcd_str_line2, menu[7]);
-        clcd_write_string(clcd_str_line2);
-		stage=3;
-		led_stage();
-	}
-
-	else if( sel.finish == 1) {
-
-        menu_clear(clcd_str_line1, clcd_str_line2);
-
-        strcat(clcd_str_line1, menu[8]);
-        clcd_write_string(clcd_str_line1);
-        clcd_set_DDRAM(0x40);
-        strcat(clcd_str_line2, menu[9]);
-        clcd_write_string(clcd_str_line2);
-
-        sigqueue(pid_owner, SIGUSR1, sell);
-	
-	sleep(5);
-	sel.all = 0;
-	}
-
-	else if (sel.error == 1)  {
-		if (sel.flag) {
-
-		menu_clear(clcd_str_line1, clcd_str_line2);
-
-		strcat(clcd_str_line1, menu[10]);
-       		clcd_write_string(clcd_str_line1);
-        	clcd_set_DDRAM(0x40);
-        	strcat(clcd_str_line2, menu[11]);
-        	clcd_write_string(clcd_str_line2);
-
-		sleep(3);
-		sel. all =0;
-		} else {
-
-		menu_clear(clcd_str_line1, clcd_str_line2);
-
-        	strcat(clcd_str_line1, menu[12]);
-        	clcd_write_string(clcd_str_line1);
-        	clcd_set_DDRAM(0x40);
-        	strcat(clcd_str_line2, menu[13]);
-        	clcd_write_string(clcd_str_line2);
-
-      		sleep(3);
-	        sel.all = 0;
-		}
-	}
-}
-
-void input_mode() {
-	int key_count, key_value;
-	char clcd_str_line1[20] = "";
-	char clcd_str_line2[20] = "";
-	int number;
-	//key_count = keypad_read(&key_value);
-	key_value = keyboard_read(&key_value, &key_count);
-	
-	dot_write(key_value+1);
-	if(key_value == 0) {
-	// next page choose 1//
-			if (sel.mainmenu == 1) {
-				sel.all =0;
-				sel.temperature = 1;
-				sell.sival_int += 1;
-			             menu_display();
-				image->mainmenu = 1;
-				number = 1500;
-					fnd_number(number);
-			}
-                       
-			else if (sel.temperature == 1) {
-                                sel.all=0;  
-				sel.sidemenu = 1;
-                                sell.sival_int += 10;
-				image->temperature = 1;
-					menu_display();
-					
-					fnd_number(number);
-                        }
-			
-			else if (sel.sidemenu == 1) {
-                               	sel.all=0;     
-				sel.payment = 1;
-                                sell.sival_int += 100;
-					menu_display();
-				image->sidemenu = 1;
-						number += 3000;
-					fnd_number(number);
-			}
-                        else if (sel.payment == 1) { 
-					sel.all=0;
-			             sel.finish = 1;
-                                sell.sival_int += 1000;
-					menu_display();
-					fnd_number(number);
-                        }
-	}
-
-	else if ( key_value == 1) {
-	// next page choose 2//
-	                if (sel.mainmenu == 1) {
-				sel.all=0;
-                                sel.temperature = 1;
-				sell.sival_int += 2;
-				     menu_display();
-				image->mainmenu = 2;
-							number = 2000;
-					fnd_number(number);
-			}
-
-                        else if (sel.temperature == 1) {
-				  sel.all =0;
-                                   sel.sidemenu = 1;
-                                sell.sival_int += 20;
-				menu_display();
-				image->temperature = 2;
-				number += 300;
-					fnd_number(number);
-                        }
-
-                        else if (sel.sidemenu == 1) {
-				sel.all=0;
-                                    sel.payment = 1;
-                                sell.sival_int += 200;
-				menu_display();
-				image->sidemenu = 2;
-				number +=2000;
-					fnd_number(number);
-                        }
-                        else if (sel.payment == 1) {
-					sel.all=0;
-				     sel.finish = 1;
-                                sell.sival_int +=		2000;
-				menu_display();
-					fnd_number(number);
-                        }
-
-	
-	}
-
-	else if ( key_value == 2) {
-	// back to previous stage //
-			if (sel.temperature == 1) {
-		                sel.all=0;   
-				sel.mainmenu = 1;
-				 sell.sival_int = 0;		
-			             menu_display();
-			}
-                        if (sel.sidemenu == 1) {
-				sel.all=0;
-                                sel.temperature = 1;
-				sell.sival_int %= 10;
-			             menu_display();
-			}
-			if (sel.payment == 1) {
-					sel.all=0;
-                                   sel.sidemenu = 1;
-				sell.sival_int %= 100;
-                                     menu_display();
-                        }
-	}
-
-	else if ( key_value == 3) {
-        // no choice //
-
-			if (sel.mainmenu == 1) {
-				sel.mainmenu = 0;
-				sel.temperature = 0;
-				sel.sidemenu = 1;
-				sel.payment = 0;
-				sel.flag = 1;
-				image->flag = 1;
-				menu_display();
-			}
-                        else if (sel.sidemenu == 1 ) {
-				if (sel.flag) {
-					sel.all=0;
-					sel.flag=-1;
-					sel.error = 1;
-					menu_display();
-				} else {
-					sel.all=0;
-                                    sel.payment = 1;
-                                     menu_display();
-				}
-                        }
-        }
-	else {
-	// restart //
-		sel.all = 0;
-		sel.error = 1;
-		menu_display();
-	}
-  	
-	if ( key_count > 1 ) {
-		sel.all = 0;
-	} 
-	usleep(0);
-}
-
-static void sigint_handler()
-{
-	kill(pid_owner, SIGINT);
-	printf("\n");
-        kill(getpid(), SIGTERM);
-	pid = wait(&wstatus);
-}
-
-static void do_owner()
+void do_owner()
 {
         signal(SIGINT, sigint_handler);
-	system("./owner");
+        system("./owner");
 }
 
-static void do_customer()
+void do_customer()
 {
-	/***** additional code *****/
+        /***** additional code *****/
         char line[100];
 
         FILE *cmd = popen("pidof owner", "r");
 
         fgets(line, 100, cmd);
-        pid_owner = strtoul(line, NULL, 10);     // get pidof owner 
+        pid_owner = strtoul(line, NULL, 10);     // get pidof owner
         signal(SIGINT, sigint_handler);          // set SIGINT(CTRL+C) handler
 
-	/***** Default code *****/
+        /***** Default code *****/
 
-        int i; 
+        int i;
         short * led, * dot[MAX_DOT], * fnd[MAX_FND];
         short * clcd_cmd, * clcd_data, * keypad_out, * keypad_in;
-	
+
         fd = open("/dev/mem", O_RDWR|O_SYNC);
         if (fd == -1) {
                 fprintf(stderr, "Cannot open /dev/mem file");
                 exit(EXIT_FAILURE);
         }
-	image = mapper_add(IEB_IMAGE, PROT_WRITE);  //additional code for Xim
+        image = mapper_image(IEB_IMAGE, PROT_WRITE);  //additional code for Xim
         led = mapper(IEB_LED, PROT_WRITE);
         for( i=0; i<MAX_DOT; i++ ) {
                 dot[i] = mapper(IEB_DOT[i], PROT_WRITE);
@@ -460,23 +93,333 @@ static void do_customer()
 
         unmapper();
         close(fd);
-	pclose(cmd);           // pclose popen 
+        pclose(cmd);           // pclose popen
+}
+void print_usage (char *prog)
+{
+        printf("%s (customer/owner) \n", prog);
+}
+
+void sigint_handler()
+{
+        kill(pid_owner, SIGINT);
+        printf("\n");
+        kill(getpid(), SIGTERM);
+        pid = wait(&wstatus);
+}
+
+void image_clear() {
+
+        /*initializing image_data*/
+
+        image->mainmenu    = 0;
+        image->temperature = 0;
+        image->sidemenu    = 0;
+        image->flag        = 0;
+}
+
+
+image_data_t * mapper_image(off_t offset, int prot) {
+        map_data[map_counter] = mmap(NULL, sizeof(struct image_data), prot, MAP_SHARED, fd, offset);
+        if ( map_data[map_counter] == MAP_FAILED ) {
+                fprintf(stderr, "Cannot do mmap()");
+                emergency_closer();
+        }
+        return (image_data_t *)map_data[map_counter++];
+}
+
+short * mapper(off_t offset, int prot) {
+	map_data[map_counter] = mmap(NULL, sizeof(short), prot, MAP_SHARED, fd, offset);
+	if ( map_data[map_counter] == MAP_FAILED ) {
+		fprintf(stderr, "Cannot do mmap()");
+		emergency_closer();
+	}
+	return (short *)map_data[map_counter++];
+}
+void unmapper() {
+        int i;
+        for( i=0; i<map_counter; i++) {
+                munmap(map_data[i], sizeof(short));
+        }
+        map_counter = 0;
+}
+
+void emergency_closer() {
+        unmapper();
+        close(fd);
+        exit(EXIT_FAILURE);
+}
+
+truth_t logic() {
+	if( sel.all == 0 ) { select_mode(); }
+	else if( sel.exit == 1 ) { return FALSE; }
+	else { input_mode(); }
+	return TRUE;
+}
+
+void select_mode() {
+	int i;  char buf[100];
+	char clcd_str_line1[20] = "";
+	char clcd_str_line2[20] = "";
+
+	led_clear();
+	dot_clear();
+	fnd_clear();
+	clcd_clear_display();
+	image_clear();
+	
+	printf("\n");
+	printf("************************************");
+	printf("*******************\n");
+	printf("*                                  \t\t      *\n");
+	printf("*  \t    Welcome to the CAU coffee shop            *\n"); 
+	printf("*                                  \t\t      *\n");
+	printf("*     \t      Type any text to order       \t      *\n");
+	printf("*                                  \t\t      *\n");
+	printf("*******************");
+	printf("************************************\n\n");
+	scanf("%s", buf);
+
+	if (strlen(buf) != 0) {
+		sel.dot = 1;
+		sel.mainmenu= 1;
+	}
+	sell.sival_int = 0;
+	sel.flag=0;
+	menu_display();
 }
 
 
 
-static void image_clear() {
+void menu_display() {
 
-	/*initializing image_data*/
+        int stage = 0; 
+	int i = 0;
+	char clcd_str_line1[20] = "";
+        char clcd_str_line2[20] = "";
 
-	image->mainmenu    = 0;
-	image->temperature = 0;
-	image->sidemenu    = 0; 
+        if( sel.mainmenu == 1 )         { clcd_write_menu(i); }
+        else if( sel.temperature == 1)  { 
+		clcd_write_menu(i+2); 
+		stage = 1;
+		led_stage(stage);	
+	}
+        else if( sel.sidemenu == 1 )    { 
+		clcd_write_menu(i+4);
+		stage = 2; 
+		led_stage(stage);
+	}
+        else if( sel.payment == 1)      { 
+		clcd_write_menu(i+6);
+		stage = 3; 
+		led_stage(stage);
+	}
+        else if( sel.finish == 1) {
+
+                 clcd_write_menu(i+8);
+                sigqueue(pid_owner, SIGUSR1, sell);
+
+                sleep(5);
+		image->flag = 2; //image intializing
+                sel.all = 0;
+        }
+
+        else if (sel.error == 1)  {
+
+                if (sel.flag) {
+                        clcd_write_menu(i+10);
+
+                        sleep(3);
+			image->flag = 2; //image intializing
+                        sel. all =0;
+                } else {
+
+                        clcd_write_menu(i+12);
+                        sleep(3);
+			image -> flag = 2; //image intializing
+                        sel.all = 0;
+                }
+        }
 }
 
-static void menu_clear(char *clcd_str_line1, char *clcd_str_line2) {
+void input_mode() {
+	int key_count, key_value;
+	char clcd_str_line1[20] = "";
+	char clcd_str_line2[20] = "";
+	int number;
+	//key_count = keypad_read(&key_value);
+	key_value = keyboard_read(&key_value, &key_count);
+	
+	dot_write(key_value+1); //dot write
+	if(key_value == 0) {
+	// next page choose 1//
+			if (sel.mainmenu == 1) {
+					 sel.all =0;  // initialize
+				sel.temperature = 1;  // set temperature 1
+				sell.sival_int += 1;  // payload for owner
+			             menu_display();
+				image->mainmenu = 1;  // mapped data image_data_t
+				      number = 1500;  // choose americano
+				 fnd_number(number);  // display fnd
+			}
+                       
+			else if (sel.temperature == 1) {
+                                          sel.all=0;  // intialize	 
+				   sel.sidemenu = 1;  // set sidemenu 1
+                               sell.sival_int += 10;  // payload for owner
+			     image->temperature = 1;  // mapped data image_data_t
+			             menu_display();
+				 fnd_number(number);  // display fnd
+                        }
+			
+			else if (sel.sidemenu == 1) {
+                               	          sel.all=0;  //same above     
+				    sel.payment = 1;
+                              sell.sival_int += 100;
+				     menu_display();
+				image->sidemenu = 1;
 
-       clcd_clear_display();
-       memset(clcd_str_line1, 0, sizeof(clcd_str_line1));
-       memset(clcd_str_line2, 0, sizeof(clcd_str_line2));
-}	
+				if ( sel.flag == 1) { number = 3000; } // jump mainmenu and choose bread 
+				else	            { number += 3000;} // choose bread   
+				 fnd_number(number);
+			}
+
+                        else if (sel.payment == 1) { 
+					  sel.all=0; //same above
+			             sel.finish = 1;
+                             sell.sival_int += 1000; 
+			 	     menu_display();
+				 fnd_number(number);
+                        }
+	}
+
+	else if ( key_value == 1) {
+	// next page choose 2//
+	                if (sel.mainmenu == 1) {
+				   	  sel.all=0; //same above
+                                sel.temperature = 1;
+				sell.sival_int += 2;
+				     menu_display();
+				image->mainmenu = 2;
+				      number = 2000; //chose latte
+				 fnd_number(number);
+			}
+
+                        else if (sel.temperature == 1) {
+				         sel.all =0; //same above
+                                   sel.sidemenu = 1;
+                               sell.sival_int += 20;
+				     menu_display();
+			     image->temperature = 2;
+			              number += 300; //choose ice 
+				 fnd_number(number);
+                        }
+
+                        else if (sel.sidemenu == 1) {
+					  sel.all=0; //sama above
+                                    sel.payment = 1;
+                              sell.sival_int += 200;
+			  	     menu_display();
+				image->sidemenu = 2;
+                                if ( sel.flag == 1) { number = 2000; } //jump mainmenu and choose cookie
+                                else     	    { number += 2000;} //choose cookie 
+				 fnd_number(number);
+                        }
+                        else if (sel.payment == 1) {
+					  sel.all=0; //same above
+				     sel.finish = 1;
+                              sell.sival_int +=2000;
+				     menu_display();
+				 fnd_number(number);
+                        }
+
+	
+	}
+
+	else if ( key_value == 2) {
+	// back to previous stage //
+			if (sel.flag == 1)  {
+				sel.all = 0; 
+				sel.flag = 0;
+				sel.error = 1;
+				menu_display();
+			}
+			else if (sel.temperature == 1) {
+
+		                sel.all=0;   
+				sel.mainmenu = 1;
+				sell.sival_int = 0;
+
+				if(image->mainmenu == 1) {
+					number -= 1500;		
+					fnd_number(number);
+				} else if (image ->mainmenu == 2){
+					number -= 2000;
+					fnd_number(number);
+				}		
+			             menu_display();
+			}
+                        else if (sel.sidemenu == 1) {
+				sel.all=0;
+                                sel.temperature = 1;
+				sell.sival_int %= 10;
+
+                                if(image->temperature == 2) {
+                                        number -= 300; 
+                                        fnd_number(number);
+                                }
+			             menu_display();
+			}
+			else if (sel.payment == 1) {
+					sel.all=0;
+                                   sel.sidemenu = 1;
+				sell.sival_int %= 100;
+
+                                if(image->sidemenu == 1) {
+                                        number -= 3000; 
+                                        fnd_number(number);
+                                } else if (image ->sidemenu == 2){
+                                        number -= 2000;
+                                        fnd_number(number);
+                                }
+
+                                     menu_display();
+                        }
+	}
+
+	else if ( key_value == 3) {
+        // no choice //
+
+			if (sel.mainmenu == 1) {
+				sel.all=0;
+				sel.sidemenu = 1;
+				sel.flag = 1;     // flag means skipping sel.mainmenu // 
+				image->flag = 1;  //send data image_data_t about jumping //
+				menu_display();
+			}
+                        else if (sel.sidemenu == 1 ) {
+				if (sel.flag) {
+					sel.all=0;
+					sel.error = 1;
+					menu_display();
+				} else {
+					sel.all=0;
+                                    sel.payment = 1;
+                                     menu_display();
+				}
+                        }
+        }
+	else {
+	// restart //
+		sel.all = 0;
+		sel.error = 1;
+		menu_display();
+	}
+  	
+	if ( key_count > 1 ) {
+		sel.all = 0;
+	} 
+	usleep(0);
+}
+
+
