@@ -1,5 +1,4 @@
-# micro_cau-3
-CAU EEE 4th grade 
+#중앙대학교 마이크로프로세서설계실습 3분반
 
-1. Ximulator.c/h and Makefile of Ximulator are updated
+X-Hyper320TKU 보드의 기능을 이용한 임베디드 시스템 설계
 2. logo.txt , image.txt must be include in src file.
